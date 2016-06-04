@@ -1,0 +1,294 @@
+
+
+
+
+
+
+
+app.js ====
+
+var myApp = angular.module('productStore', []);
+ myApp.config(['$routeProvider', function($routeProvider) { 
+	$routeProvider
+	.when('/home', { 
+		templateUrl: '/index.html',
+		controller: 'loadStoreList'	
+	})
+	.when('/store', { 
+		templateUrl: 'pages/store.html',
+		controller: 'loadStoreList'	
+	})	 
+	.when('/cart', { 
+		templateUrl: 'pages/cart.html',
+		controller: 'loadStoreCart'	
+	})	 	
+	.otherwise({
+		redirectTo: '/store'
+	})
+}]);  
+
+myApp.controller('loadStoreList', function($scope, $routeParams, DataService, shoppingCart) { 
+ 
+  $scope.store = DataService.store;
+    if(localStorage.getItem('shoppingCart') != null) {
+		shoppingCart.cartData2($scope)
+	}
+  //new shoppingCart.cartData2($scope);		
+  
+  $scope.addItem = function(id, name, price) {		 
+	 new shoppingCart.addItem2(id, name, price);		
+	 new shoppingCart.cartData2($scope);		
+  } 
+  
+});  
+myApp.controller('loadStoreCart', function($scope, $routeParams, DataService, shoppingCart) { 
+  
+  $scope.cartStore = JSON.parse(localStorage.getItem('shoppingCart'));
+  
+  $scope.addItem = function(id, name, price) {		 
+	 new shoppingCart.addItem2(id, name, price); 
+	  
+  }  
+  
+  $scope.removeItem = function(id) {		 
+	 new shoppingCart.removeItem2(id); 
+  }
+  
+  $scope.decreaseItem = function(id) {		 
+	 new shoppingCart.decreaseItem2(id); 
+  } 
+  	// re populate the list
+  $scope.populateItem = function(id) {   	 
+		new shoppingCart.removeItem2(id); 
+	   	new shoppingCart.populateItem2($scope,id);   
+   }  
+   
+});  
+
+myApp.factory("DataService", function () {
+
+    // create store
+    var myStore = new store(); 
+    return {
+        store: myStore 
+    };
+}); 
+
+myApp.service('shoppingCart', function() {
+
+  // Add items into the cart
+  this.addItem2 = function(id, name, price) { 
+ 
+  	var ItemArr = [];
+	var ItemArrNew = []; 
+	ItemArr = JSON.parse(localStorage.getItem('shoppingCart'));  
+	var ItemFound = false;
+		
+  	if(localStorage.getItem('shoppingCart') == null) {
+		ItemArrLength	 = 0;
+	} else {
+		ItemArrLength	 = ItemArr.length;
+	}
+  	for(var i=0; i<ItemArrLength; i++) { 
+	 
+		if(ItemArr[i].id == id) {
+			ItemArr[i].count =  ItemArr[i].count + 1;
+			ItemFound = true;			 
+			ItemArrNew.push({'id':ItemArr[i].id,'price':ItemArr[i].price,'name':ItemArr[i].name, 'count':ItemArr[i].count}); 
+		} else {			 
+			ItemArrNew.push({'id':ItemArr[i].id,'price':ItemArr[i].price,'name':ItemArr[i].name, 'count':ItemArr[i].count}); 
+		} 
+	}
+ 
+	if(ItemFound == false) { 
+		ItemArrNew.push({'id':id,'price':price,'name':name, 'count':1});	 
+	}
+	   
+    localStorage.removeItem('shoppingCart');
+	localStorage.setItem('shoppingCart',JSON.stringify(ItemArrNew));	
+	ItemArr = "";
+	ItemArrNew = "";
+	 	 
+  } 
+  
+  
+  
+  //decrease items into the cart
+  this.decreaseItem2 = function(id) { 
+ 
+  	var ItemArr = [];
+	var ItemArrNew = []; 
+	ItemArr = JSON.parse(localStorage.getItem('shoppingCart'));  
+	var ItemFound = false;
+		
+  	if(localStorage.getItem('shoppingCart') == null) {
+		ItemArrLength	 = 0;
+	} else {
+		ItemArrLength	 = ItemArr.length;
+	}
+  	for(var i=0; i<ItemArrLength; i++) { 
+	 
+		if(ItemArr[i].id == id) {
+			ItemArr[i].count =  ItemArr[i].count + 1;
+			ItemFound = true;			 
+			ItemArrNew.push({'id':ItemArr[i].id,'price':ItemArr[i].price,'name':ItemArr[i].name, 'count':ItemArr[i].count}); 
+		} else {			 
+			ItemArrNew.push({'id':ItemArr[i].id,'price':ItemArr[i].price,'name':ItemArr[i].name, 'count':ItemArr[i].count}); 
+		} 
+	}
+ 
+	if(ItemFound == false) { 
+		ItemArrNew.push({'id':id,'price':price,'name':name, 'count':1});	 
+	}
+	   
+    localStorage.removeItem('shoppingCart');
+	localStorage.setItem('shoppingCart',JSON.stringify(ItemArrNew));	
+	ItemArr = "";
+	ItemArrNew = "";
+	 	 
+  }  
+  
+  //remove items into the cart
+  this.removeItem2 = function(id) { 
+ 
+  	var ItemArr = [];
+	var ItemArrNew = []; 
+	ItemArr = JSON.parse(localStorage.getItem('shoppingCart'));  
+	var ItemFound = false;
+		
+  	if(localStorage.getItem('shoppingCart') == null) {
+		ItemArrLength	 = 0;
+	} else {
+		ItemArrLength	 = ItemArr.length;
+	}
+  	for(var i=0; i<ItemArrLength; i++) { 
+	 
+		if(ItemArr[i].id == id) { 
+		} else {			 
+			ItemArrNew.push({'id':ItemArr[i].id,'price':ItemArr[i].price,'name':ItemArr[i].name, 'count':ItemArr[i].count}); 
+		} 
+	} 
+	   
+    localStorage.removeItem('shoppingCart');
+	localStorage.setItem('shoppingCart',JSON.stringify(ItemArrNew));	
+	ItemArr = "";
+	ItemArrNew = ""; 
+	 	 
+  }  
+  
+    // Add items into the cart
+  this.populateItem2 = function($scope,id) {  
+  
+		$scope.cartStore = JSON.parse(localStorage.getItem('shoppingCart')); 
+  }
+  
+  this.cartData2 = function($scope) {
+	JSON.parse(localStorage.getItem('shoppingCart')).length <= 1 ? cartLengthS = "" : cartLengthS = "s";			 
+	$scope.cartData ="You have "+ JSON.parse(localStorage.getItem('shoppingCart')).length + " Item" + cartLengthS +" in the cart";		  
+  }
+  
+  
+
+}); 
+
+
+app.js ==== END
+
+store.js =====
+
+function store() {
+	this.products = [ 
+		new product("HSBC FUND 1", "HSBC FUND", 200, "ID001"),
+		new product("HSBC FUND 2", "HSBC FUND", 100, "ID002"),		
+		new product("HSBC GIF 2", "HSBC FUND", 100, "ID003"),
+		new product("HSBC AMANAH 2", "HSBC FUND", 100, "ID004"),
+		new product("HSBC PROTFOLIO 2", "HSBC FUND", 100, "ID005"),
+		new product("HSBC RTY 2", "HSBC FUND", 100, "ID006"),	
+		new product("HSBC FUND 3", "HSBC FUND", 300, "ID007")		
+	];
+}
+
+store.js ===== END
+
+product.js =====
+
+ 
+ function product(name, description, price, itemID) {
+	this.name = name;
+	this.description = description;
+	this.price = price;
+	this.itemID = itemID;
+}
+
+product.js ===== END
+
+cart.html =====
+
+<style>
+	.odd{ background-color:#CCC} 
+</style> 
+<table>
+<tr>
+<td>Product</td><td>Unit Price</td><td> Quantity</td> 
+</tr>
+    <tr  ng-repeat="productItem in cartStore"  ng-class-odd="'odd'" ng-class-even="'even'">
+      <!--addItem(productItem.id, productItem.name, productItem.price); -->
+   	<td>{{productItem.name}}</td> <td>{{productItem.price}}</td> <td><input type="text" value="{{productItem.count}}" /> 
+    <button ng-click="productItem.count = productItem.count+1; addItem(productItem.id, productItem.name, productItem.price);" ng-init="count=productItem.count" >+</button> 
+    <button ng-click="productItem.count = productItem.count-1; decreaseItem(productItem.id);" ng-init="count=productItem.count" >-</button> 
+   <button ng-click="  populateItem(productItem.id);"  >X</button>  
+ </td> 
+    </tr> 
+</table> 
+ 
+ cart.html ===== END
+ 
+ store.html =====
+ 
+ <p>
+    Search: <input ng-model="search">
+</p> 
+<br />
+<br />
+<br /> 
+<div ng-model="cartData">{{cartData}} <a href='http://localhost:99/spa/shopping-cart/ll/#/cart' ng-show="cartData"> View </a></div><br />
+<br /> 
+<table> 
+    <tr ng-repeat="product in store.products | orderBy:'name' | filter:search">
+   	 <td>{{product.name}}</td>
+      <td>{{product.description}}</td>
+       <td>{{product.price}}</td>
+       <td><a href="" ng-click="addItem(product.itemID, product.name, product.price)">Add to cart</a></td>
+    </tr> 
+</table> 
+
+store.html ===== END
+
+index.html =====
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+    <script type="text/javascript" src="http://ff.kis.scr.kaspersky-labs.com/1B74BD89-2A22-4B93-B451-1C9E1052A0EC/main.js" charset="UTF-8"></script><script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js" type="text/javascript" ></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.0.5/angular.min.js" type="text/javascript"></script> 
+    <!-- Bootstrap -->
+    <link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet" type="text/css"/>
+    <!--<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js" type="text/javascript" ></script>--> 
+    <!-- Stripe -->
+    <script src="https://checkout.stripe.com/v2/checkout.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.32/jquery.form.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.blockUI/2.61.0-2013.06.06/jquery.blockUI.min.js"></script> 
+        <script src="js/app.js" type="text/javascript"></script>
+         <script src="js/store.js" type="text/javascript"></script>
+         <script src="js/product.js" type="text/javascript"></script>  
+</head> 
+<body ng-app="productStore" > 
+    <div ng-view></div> 
+</body>
+</html>
+
+
+index.html ===== END
+                                                    
